@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - SP & 랭킹</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+        --card-background: rgba(26, 58, 47, 0.3);
+
+        /* 랭크 색상 */
+        --juvenile: #3498db;
+        --subadult: #9b59b6;
+        --adult: #e67e22;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+
+      /* 상단 바 */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(26, 58, 47, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .back-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+      }
+
+      .page-title {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .logo {
+        height: 30px;
+        width: 30px;
+        background: var(--accent-color);
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: var(--background);
+        border-radius: 5px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      /* 메인 컨테이너 */
+      .main-container {
+        padding: 80px 20px 20px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      /* SP 카드 */
+      .sp-card {
+        background: linear-gradient(
+          135deg,
+          rgba(74, 157, 127, 0.2),
+          rgba(44, 79, 67, 0.2)
+        );
+        border: 1px solid rgba(74, 157, 127, 0.3);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      .sp-main {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 8px;
+        text-shadow: 0 2px 8px rgba(74, 157, 127, 0.3);
+      }
+
+      .sp-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      .sp-trend {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        font-size: 14px;
+        color: #2ecc71;
+      }
+
+      /* 랭크 카드 */
+      .rank-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .rank-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 16px;
+      }
+
+      .rank-badge {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--juvenile), #2980b9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        margin-right: 16px;
+        box-shadow: 0 4px 12px rgba(52, 152, 219, 0.4);
+      }
+
+      .rank-info h3 {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .rank-info p {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .progress-section {
+        margin-top: 16px;
+      }
+
+      .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 8px;
+      }
+
+      .progress-label {
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .progress-value {
+        font-size: 14px;
+        color: var(--juvenile);
+        font-weight: 600;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 8px;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          var(--juvenile),
+          var(--accent-color)
+        );
+        border-radius: 6px;
+        width: 0%;
+        animation: progressAnimation 2s ease-out 0.5s forwards;
+      }
+
+      .progress-text {
+        font-size: 12px;
+        color: var(--text-secondary);
+        text-align: center;
+      }
+
+      /* 순위 카드 */
+      .ranking-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .ranking-header {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .ranking-main {
+        text-align: center;
+        margin-bottom: 16px;
+      }
+
+      .ranking-position {
+        font-size: 36px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .ranking-total {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .ranking-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 16px;
+      }
+
+      .ranking-stat {
+        text-align: center;
+        padding: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+      }
+
+      .ranking-stat-value {
+        font-size: 18px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .ranking-stat-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* 히스토리 카드 */
+      .history-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .history-header {
+        font-size: 16px;
+        font-weight: 600;
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .history-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .history-item:last-child {
+        border-bottom: none;
+      }
+
+      .history-date {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .history-change {
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .history-change.positive {
+        color: #2ecc71;
+      }
+
+      .history-change.negative {
+        color: #e74c3c;
+      }
+
+      /* 애니메이션 */
+      @keyframes progressAnimation {
+        from {
+          width: 0%;
+        }
+        to {
+          width: 56.94%;
+        } /* 2847/5000 * 100 */
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 상단 바 -->
+    <div class="top-bar">
+      <div class="back-button">←</div>
+      <div class="page-title">SP & 랭킹</div>
+      <div class="logo"></div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+      <!-- SP 카드 -->
+      <div class="sp-card fade-in">
+        <div class="sp-main" id="spCounter">2,847</div>
+        <div class="sp-label">총 Shell Points</div>
+        <div class="sp-trend">📈 +124 SP (이번 주)</div>
+      </div>
+
+      <!-- 랭크 카드 -->
+      <div class="rank-card fade-in">
+        <div class="rank-header">
+          <div class="rank-badge">🐢</div>
+          <div class="rank-info">
+            <h3>주니어 (Juvenile)</h3>
+            <p>활발한 젊은 거북이</p>
+          </div>
+        </div>
+
+        <div class="progress-section">
+          <div class="progress-header">
+            <span class="progress-label">서브어덜트까지</span>
+            <span class="progress-value">2,847 / 5,000 SP</span>
+          </div>
+          <div class="progress-bar">
+            <div class="progress-fill"></div>
+          </div>
+          <div class="progress-text">2,153 SP 더 필요해요!</div>
+        </div>
+      </div>
+
+      <!-- 순위 카드 -->
+      <div class="ranking-card fade-in">
+        <div class="ranking-header">🏆 전체 순위</div>
+        <div class="ranking-main">
+          <div class="ranking-position">#142</div>
+          <div class="ranking-total">전체 8,247명 중</div>
+        </div>
+
+        <div class="ranking-stats">
+          <div class="ranking-stat">
+            <div class="ranking-stat-value">상위 1.7%</div>
+            <div class="ranking-stat-label">백분율</div>
+          </div>
+          <div class="ranking-stat">
+            <div class="ranking-stat-value">+12</div>
+            <div class="ranking-stat-label">이번 주 상승</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SP 히스토리 -->
+      <div class="history-card fade-in">
+        <div class="history-header">📊 최근 SP 변화</div>
+
+        <div class="history-item">
+          <span class="history-date">2024.12.29</span>
+          <span class="history-change positive">+89 SP</span>
+        </div>
+        <div class="history-item">
+          <span class="history-date">2024.12.28</span>
+          <span class="history-change positive">+45 SP</span>
+        </div>
+        <div class="history-item">
+          <span class="history-date">2024.12.27</span>
+          <span class="history-change positive">+67 SP</span>
+        </div>
+        <div class="history-item">
+          <span class="history-date">2024.12.26</span>
+          <span class="history-change positive">+52 SP</span>
+        </div>
+        <div class="history-item">
+          <span class="history-date">2024.12.25</span>
+          <span class="history-change negative">-12 SP</span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 뒤로가기 버튼
+      document.querySelector(".back-button").addEventListener("click", () => {
+        console.log("Navigate back to profile menu");
+        window.location.href = "2.2.1.profile_menu.html";
+      });
+
+      // SP 카운팅 애니메이션
+      document.addEventListener("DOMContentLoaded", () => {
+        const spCounter = document.getElementById("spCounter");
+        let currentSP = 0;
+        const targetSP = 2847;
+        const increment = targetSP / 60;
+
+        const countingInterval = setInterval(() => {
+          currentSP += increment;
+          if (currentSP >= targetSP) {
+            currentSP = targetSP;
+            clearInterval(countingInterval);
+          }
+          spCounter.textContent = Math.floor(currentSP).toLocaleString();
+        }, 30);
+
+        // 페이드인 애니메이션 순차 적용
+        const cards = document.querySelectorAll(".fade-in");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.2}s`;
+        });
+      });
+    </script>
+  </body>
+</html>

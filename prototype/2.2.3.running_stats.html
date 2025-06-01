@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 러닝 통계</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+        --card-background: rgba(26, 58, 47, 0.3);
+        --success-color: #2ecc71;
+        --warning-color: #f39c12;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+
+      /* 상단 바 */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(26, 58, 47, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .back-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+      }
+
+      .page-title {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .logo {
+        height: 30px;
+        width: 30px;
+        background: var(--accent-color);
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: var(--background);
+        border-radius: 5px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      /* 메인 컨테이너 */
+      .main-container {
+        padding: 80px 20px 20px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      /* 통계 카드 */
+      .stats-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .stats-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(74, 157, 127, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--accent-color);
+      }
+
+      .stats-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      /* 주요 통계 그리드 */
+      .main-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .stat-item {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-item::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-color),
+          var(--success-color)
+        );
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      .stat-trend {
+        font-size: 11px;
+        color: var(--success-color);
+        margin-top: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+      }
+
+      /* 이번 달 활동 */
+      .monthly-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .monthly-item {
+        text-align: center;
+        padding: 16px 12px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+      }
+
+      .monthly-value {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .monthly-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      /* 기록 섹션 */
+      .records-list {
+        margin-top: 16px;
+      }
+
+      .record-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .record-item:last-child {
+        border-bottom: none;
+      }
+
+      .record-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .record-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-color);
+      }
+
+      .record-date {
+        font-size: 12px;
+        color: var(--text-secondary);
+        margin-left: 8px;
+      }
+
+      /* 차트 영역 */
+      .chart-container {
+        height: 120px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        margin-top: 16px;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .chart-bars {
+        display: flex;
+        align-items: end;
+        height: 100%;
+        padding: 16px;
+        gap: 8px;
+      }
+
+      .chart-bar {
+        flex: 1;
+        background: linear-gradient(
+          180deg,
+          var(--accent-color),
+          var(--secondary-color)
+        );
+        border-radius: 4px 4px 0 0;
+        min-height: 20px;
+        position: relative;
+        animation: barGrow 1s ease-out forwards;
+        transform-origin: bottom;
+      }
+
+      .chart-bar:nth-child(1) {
+        height: 45%;
+        animation-delay: 0.1s;
+      }
+      .chart-bar:nth-child(2) {
+        height: 60%;
+        animation-delay: 0.2s;
+      }
+      .chart-bar:nth-child(3) {
+        height: 35%;
+        animation-delay: 0.3s;
+      }
+      .chart-bar:nth-child(4) {
+        height: 80%;
+        animation-delay: 0.4s;
+      }
+      .chart-bar:nth-child(5) {
+        height: 55%;
+        animation-delay: 0.5s;
+      }
+      .chart-bar:nth-child(6) {
+        height: 70%;
+        animation-delay: 0.6s;
+      }
+      .chart-bar:nth-child(7) {
+        height: 90%;
+        animation-delay: 0.7s;
+      }
+
+      .chart-labels {
+        display: flex;
+        justify-content: space-between;
+        padding: 8px 16px;
+        font-size: 10px;
+        color: var(--text-secondary);
+      }
+
+      /* 애니메이션 */
+      @keyframes barGrow {
+        from {
+          transform: scaleY(0);
+        }
+        to {
+          transform: scaleY(1);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 상단 바 -->
+    <div class="top-bar">
+      <div class="back-button">←</div>
+      <div class="page-title">러닝 통계</div>
+      <div class="logo"></div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+      <!-- 주요 통계 -->
+      <div class="main-stats fade-in">
+        <div class="stat-item">
+          <div class="stat-value" id="totalDistance">142.7</div>
+          <div class="stat-label">총 거리 (km)</div>
+          <div class="stat-trend">📈 +12.3km 이번 주</div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value" id="totalTime">24:15</div>
+          <div class="stat-label">총 시간 (시간)</div>
+          <div class="stat-trend">📈 +2:30 이번 주</div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value" id="avgPace">6:24</div>
+          <div class="stat-label">평균 페이스 (/km)</div>
+          <div class="stat-trend">⚡ -0:15 개선</div>
+        </div>
+
+        <div class="stat-item">
+          <div class="stat-value" id="totalRuns">47</div>
+          <div class="stat-label">총 러닝 횟수</div>
+          <div class="stat-trend">📈 +5회 이번 주</div>
+        </div>
+      </div>
+
+      <!-- 이번 달 활동 -->
+      <div class="stats-card fade-in">
+        <div class="stats-header">
+          <div class="stats-icon">📅</div>
+          <div class="stats-title">이번 달 활동</div>
+        </div>
+
+        <div class="monthly-stats">
+          <div class="monthly-item">
+            <div class="monthly-value">12</div>
+            <div class="monthly-label">러닝 횟수</div>
+          </div>
+          <div class="monthly-item">
+            <div class="monthly-value">48.2</div>
+            <div class="monthly-label">총 거리 (km)</div>
+          </div>
+          <div class="monthly-item">
+            <div class="monthly-value">8:15</div>
+            <div class="monthly-label">총 시간</div>
+          </div>
+        </div>
+
+        <!-- 주간 차트 -->
+        <div class="chart-container">
+          <div class="chart-bars">
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+            <div class="chart-bar"></div>
+          </div>
+        </div>
+        <div class="chart-labels">
+          <span>월</span>
+          <span>화</span>
+          <span>수</span>
+          <span>목</span>
+          <span>금</span>
+          <span>토</span>
+          <span>일</span>
+        </div>
+      </div>
+
+      <!-- 개인 기록 -->
+      <div class="stats-card fade-in">
+        <div class="stats-header">
+          <div class="stats-icon">🏆</div>
+          <div class="stats-title">개인 기록</div>
+        </div>
+
+        <div class="records-list">
+          <div class="record-item">
+            <span class="record-label">최장 거리</span>
+            <span class="record-value">
+              15.2 km
+              <span class="record-date">2024.12.15</span>
+            </span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">최고 페이스</span>
+            <span class="record-value">
+              5:42 /km
+              <span class="record-date">2024.12.22</span>
+            </span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">최장 시간</span>
+            <span class="record-value">
+              1:32:45
+              <span class="record-date">2024.12.15</span>
+            </span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">연속 러닝</span>
+            <span class="record-value">
+              7일
+              <span class="record-date">현재 진행중</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 페이스 분석 -->
+      <div class="stats-card fade-in">
+        <div class="stats-header">
+          <div class="stats-icon">⚡</div>
+          <div class="stats-title">페이스 분석</div>
+        </div>
+
+        <div class="records-list">
+          <div class="record-item">
+            <span class="record-label">1km 평균</span>
+            <span class="record-value">6:24</span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">5km 평균</span>
+            <span class="record-value">6:32</span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">10km 평균</span>
+            <span class="record-value">6:48</span>
+          </div>
+
+          <div class="record-item">
+            <span class="record-label">하프마라톤</span>
+            <span class="record-value">7:15</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 뒤로가기 버튼
+      document.querySelector(".back-button").addEventListener("click", () => {
+        console.log("Navigate back to profile menu");
+        window.location.href = "2.2.1.profile_menu.html";
+      });
+
+      // 통계 카운팅 애니메이션
+      document.addEventListener("DOMContentLoaded", () => {
+        // 거리 카운팅
+        const distanceEl = document.getElementById("totalDistance");
+        animateValue(distanceEl, 0, 142.7, 1500, true);
+
+        // 시간 카운팅 (시:분 형식)
+        const timeEl = document.getElementById("totalTime");
+        animateTime(timeEl, 0, 24 * 60 + 15, 1500); // 총 분으로 계산
+
+        // 페이스는 고정값으로 설정
+        // 러닝 횟수 카운팅
+        const runsEl = document.getElementById("totalRuns");
+        animateValue(runsEl, 0, 47, 1200);
+
+        // 페이드인 애니메이션 순차 적용
+        const cards = document.querySelectorAll(".fade-in");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.3}s`;
+        });
+      });
+
+      function animateValue(element, start, end, duration, isDecimal = false) {
+        let startTime = null;
+
+        function step(currentTime) {
+          if (!startTime) startTime = currentTime;
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const current = start + (end - start) * progress;
+
+          if (isDecimal) {
+            element.textContent = current.toFixed(1);
+          } else {
+            element.textContent = Math.floor(current);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      function animateTime(element, start, endMinutes, duration) {
+        let startTime = null;
+
+        function step(currentTime) {
+          if (!startTime) startTime = currentTime;
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const currentMinutes = Math.floor(
+            start + (endMinutes - start) * progress
+          );
+
+          const hours = Math.floor(currentMinutes / 60);
+          const minutes = currentMinutes % 60;
+          element.textContent = `${hours}:${minutes
+            .toString()
+            .padStart(2, "0")}`;
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+    </script>
+  </body>
+</html>

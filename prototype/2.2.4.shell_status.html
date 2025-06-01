@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - Shell 현황</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+        --card-background: rgba(26, 58, 47, 0.3);
+        --shell-color: #4a9d7f;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+
+      /* 상단 바 */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(26, 58, 47, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .back-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+      }
+
+      .page-title {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .logo {
+        height: 30px;
+        width: 30px;
+        background: var(--accent-color);
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: var(--background);
+        border-radius: 5px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      /* 메인 컨테이너 */
+      .main-container {
+        padding: 80px 20px 20px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      /* Shell 요약 카드 */
+      .shell-summary {
+        background: linear-gradient(
+          135deg,
+          rgba(74, 157, 127, 0.2),
+          rgba(44, 79, 67, 0.2)
+        );
+        border: 1px solid rgba(74, 157, 127, 0.3);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+      }
+
+      .shell-count {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 8px;
+        text-shadow: 0 2px 8px rgba(74, 157, 127, 0.3);
+      }
+
+      .shell-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      .shell-area {
+        font-size: 20px;
+        font-weight: 600;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .area-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* 통계 그리드 */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+
+      .stat-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        position: relative;
+        overflow: hidden;
+      }
+
+      .stat-card::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-color),
+          var(--shell-color)
+        );
+      }
+
+      .stat-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      .stat-value {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 4px;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* Shell 목록 */
+      .shell-list-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .shell-list-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .shell-list-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(74, 157, 127, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--accent-color);
+      }
+
+      .shell-list-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .shell-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .shell-item:last-child {
+        border-bottom: none;
+      }
+
+      .shell-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .shell-mini-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: rgba(74, 157, 127, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .shell-details {
+        flex: 1;
+      }
+
+      .shell-name {
+        font-size: 14px;
+        font-weight: 500;
+        margin-bottom: 2px;
+      }
+
+      .shell-location {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      .shell-size {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-color);
+      }
+
+      .shell-date {
+        font-size: 11px;
+        color: var(--text-secondary);
+        margin-top: 2px;
+      }
+
+      /* Shell 시각화 */
+      .shell-visual {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        text-align: center;
+      }
+
+      .shell-pattern {
+        width: 120px;
+        height: 120px;
+        margin: 0 auto 16px;
+        position: relative;
+        border-radius: 12px;
+        background: linear-gradient(
+            45deg,
+            rgba(74, 157, 127, 0.1) 25%,
+            transparent 25%,
+            transparent 75%,
+            rgba(74, 157, 127, 0.1) 75%
+          ),
+          linear-gradient(
+            45deg,
+            rgba(74, 157, 127, 0.1) 25%,
+            transparent 25%,
+            transparent 75%,
+            rgba(74, 157, 127, 0.1) 75%
+          );
+        background-size: 20px 20px;
+        background-position: 0 0, 10px 10px;
+        border: 2px dashed var(--accent-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+      }
+
+      .pattern-label {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 4px;
+      }
+
+      .pattern-description {
+        font-size: 12px;
+        color: var(--text-secondary);
+      }
+
+      /* 성과 카드 */
+      .achievement-card {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 215, 0, 0.1),
+          rgba(255, 165, 0, 0.1)
+        );
+        border: 1px solid rgba(255, 215, 0, 0.3);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .achievement-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .achievement-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(255, 215, 0, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #ffd700;
+      }
+
+      .achievement-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .achievement-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+
+      .achievement-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        background: rgba(255, 215, 0, 0.05);
+        border-radius: 12px;
+      }
+
+      .achievement-badge {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: #ffd700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .achievement-text {
+        flex: 1;
+        font-size: 14px;
+      }
+
+      /* 애니메이션 */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+
+      @keyframes countUp {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      .count-animation {
+        animation: countUp 2s ease-out;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 상단 바 -->
+    <div class="top-bar">
+      <div class="back-button">←</div>
+      <div class="page-title">Shell 현황</div>
+      <div class="logo"></div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+      <!-- Shell 요약 -->
+      <div class="shell-summary fade-in">
+        <div class="shell-count" id="shellCount">7</div>
+        <div class="shell-label">점령한 Shell</div>
+        <div class="shell-area" id="totalArea">2.34</div>
+        <div class="area-label">총 면적 (km²)</div>
+      </div>
+
+      <!-- 통계 그리드 -->
+      <div class="stats-grid fade-in">
+        <div class="stat-card">
+          <div class="stat-icon">👑</div>
+          <div class="stat-value" id="largestShell">0.52</div>
+          <div class="stat-label">최대 Shell (km²)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">📈</div>
+          <div class="stat-value" id="avgShell">0.33</div>
+          <div class="stat-label">평균 크기 (km²)</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🕒</div>
+          <div class="stat-value">3일</div>
+          <div class="stat-label">최근 점령</div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-icon">🔥</div>
+          <div class="stat-value">12일</div>
+          <div class="stat-label">연속 확장</div>
+        </div>
+      </div>
+
+      <!-- Shell 패턴 시각화 -->
+      <div class="shell-visual fade-in">
+        <div class="shell-pattern">🗺️</div>
+        <div class="pattern-label">나만의 Shell 패턴</div>
+        <div class="pattern-description">
+          주로 공원과 강변을 따라 형성된 독특한 패턴
+        </div>
+      </div>
+
+      <!-- 최근 점령한 Shell 목록 -->
+      <div class="shell-list-card fade-in">
+        <div class="shell-list-header">
+          <div class="shell-list-icon">🏃‍♂️</div>
+          <div class="shell-list-title">최근 점령한 Shell</div>
+        </div>
+
+        <div class="shell-item">
+          <div class="shell-info">
+            <div class="shell-mini-icon">🌳</div>
+            <div class="shell-details">
+              <div class="shell-name">한강공원 Shell #3</div>
+              <div class="shell-location">반포대교 ~ 동작대교</div>
+            </div>
+          </div>
+          <div>
+            <div class="shell-size">0.52 km²</div>
+            <div class="shell-date">3일 전</div>
+          </div>
+        </div>
+
+        <div class="shell-item">
+          <div class="shell-info">
+            <div class="shell-mini-icon">🏢</div>
+            <div class="shell-details">
+              <div class="shell-name">올림픽공원 Shell #1</div>
+              <div class="shell-location">몽촌토성역 일대</div>
+            </div>
+          </div>
+          <div>
+            <div class="shell-size">0.38 km²</div>
+            <div class="shell-date">1주 전</div>
+          </div>
+        </div>
+
+        <div class="shell-item">
+          <div class="shell-info">
+            <div class="shell-mini-icon">🌉</div>
+            <div class="shell-details">
+              <div class="shell-name">청계천 Shell #2</div>
+              <div class="shell-location">광화문 ~ 을지로</div>
+            </div>
+          </div>
+          <div>
+            <div class="shell-size">0.29 km²</div>
+            <div class="shell-date">2주 전</div>
+          </div>
+        </div>
+
+        <div class="shell-item">
+          <div class="shell-info">
+            <div class="shell-mini-icon">🏞️</div>
+            <div class="shell-details">
+              <div class="shell-name">남산공원 Shell #1</div>
+              <div class="shell-location">N서울타워 일대</div>
+            </div>
+          </div>
+          <div>
+            <div class="shell-size">0.41 km²</div>
+            <div class="shell-date">3주 전</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shell 성과 -->
+      <div class="achievement-card fade-in">
+        <div class="achievement-header">
+          <div class="achievement-icon">🏆</div>
+          <div class="achievement-title">Shell 성과</div>
+        </div>
+
+        <div class="achievement-list">
+          <div class="achievement-item">
+            <div class="achievement-badge">🥇</div>
+            <div class="achievement-text">
+              <strong>영토 개척자</strong><br />
+              첫 Shell 점령 달성
+            </div>
+          </div>
+
+          <div class="achievement-item">
+            <div class="achievement-badge">🌟</div>
+            <div class="achievement-text">
+              <strong>영역 확장가</strong><br />
+              5개 이상 Shell 점령
+            </div>
+          </div>
+
+          <div class="achievement-item">
+            <div class="achievement-badge">👑</div>
+            <div class="achievement-text">
+              <strong>대형 Shell 정복자</strong><br />
+              0.5km² 이상 Shell 점령
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 뒤로가기 버튼
+      document.querySelector(".back-button").addEventListener("click", () => {
+        console.log("Navigate back to profile menu");
+        window.location.href = "2.2.1.profile_menu.html";
+      });
+
+      // Shell 통계 카운팅 애니메이션
+      document.addEventListener("DOMContentLoaded", () => {
+        // Shell 개수 카운팅
+        const shellCountEl = document.getElementById("shellCount");
+        animateValue(shellCountEl, 0, 7, 1500);
+
+        // 총 면적 카운팅
+        const totalAreaEl = document.getElementById("totalArea");
+        animateValue(totalAreaEl, 0, 2.34, 2000, true);
+
+        // 최대 Shell 크기
+        const largestShellEl = document.getElementById("largestShell");
+        animateValue(largestShellEl, 0, 0.52, 1800, true);
+
+        // 평균 크기
+        const avgShellEl = document.getElementById("avgShell");
+        animateValue(avgShellEl, 0, 0.33, 2200, true);
+
+        // 페이드인 애니메이션 순차 적용
+        const cards = document.querySelectorAll(".fade-in");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.2}s`;
+        });
+      });
+
+      function animateValue(element, start, end, duration, isDecimal = false) {
+        let startTime = null;
+
+        function step(currentTime) {
+          if (!startTime) startTime = currentTime;
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const current = start + (end - start) * progress;
+
+          if (isDecimal) {
+            element.textContent = current.toFixed(2);
+          } else {
+            element.textContent = Math.floor(current);
+          }
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+    </script>
+  </body>
+</html>

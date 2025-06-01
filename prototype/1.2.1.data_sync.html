@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 데이터 연동</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .data-sync {
+        background: linear-gradient(
+          135deg,
+          var(--background),
+          var(--main-color)
+        );
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: var(--text);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+      }
+
+      .sync-section {
+        background: rgba(26, 58, 47, 0.2);
+        border: 1px solid var(--accent-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .sync-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .sync-icon {
+        width: 40px;
+        height: 40px;
+        background: var(--accent-color);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 15px;
+      }
+
+      .sync-title {
+        font-size: 18px;
+        font-weight: 600;
+      }
+
+      .sync-description {
+        color: var(--text-secondary);
+        margin-bottom: 15px;
+        line-height: 1.5;
+      }
+
+      .sync-button {
+        width: 100%;
+        padding: 12px;
+        background: var(--accent-color);
+        color: var(--text);
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .sync-button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .sync-button:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .sync-status {
+        margin-top: 10px;
+        font-size: 14px;
+        color: var(--text-secondary);
+      }
+
+      .sync-progress {
+        width: 100%;
+        height: 4px;
+        background: rgba(74, 157, 127, 0.2);
+        border-radius: 2px;
+        margin-top: 10px;
+        overflow: hidden;
+      }
+
+      .progress-bar {
+        height: 100%;
+        background: var(--accent-color);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      .next-button {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-color);
+        color: var(--text);
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-top: 20px;
+      }
+
+      .next-button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .next-button:disabled {
+        background: var(--text-secondary);
+        cursor: not-allowed;
+        transform: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="data-sync">
+        <h1>데이터 연동</h1>
+        <p class="subtitle">러닝 데이터를 연동하여 Shell을 생성해보세요</p>
+
+        <div class="sync-section">
+          <div class="sync-header">
+            <div class="sync-icon">⌚</div>
+            <div class="sync-title">애플워치 연동</div>
+          </div>
+          <p class="sync-description">
+            애플워치의 피트니스 데이터를 연동하여 러닝 활동을 자동으로
+            기록합니다.
+          </p>
+          <div class="sync-status">연동 중...</div>
+          <div class="sync-progress">
+            <div class="progress-bar" style="width: 100%"></div>
+          </div>
+        </div>
+
+        <div class="sync-section">
+          <div class="sync-header">
+            <div class="sync-icon">📊</div>
+            <div class="sync-title">러닝 데이터 동기화</div>
+          </div>
+          <p class="sync-description">
+            기존 러닝 세션 데이터를 동기화하여 Shell을 생성합니다. 최대 30일치의
+            데이터를 가져올 수 있습니다.
+          </p>
+          <button
+            class="sync-button"
+            onclick="window.location.href='1.2.3.sync_splash.html'"
+          >
+            <span>데이터 동기화하기</span>
+          </button>
+          <div class="sync-status">동기화 대기 중</div>
+          <div class="sync-progress">
+            <div class="progress-bar"></div>
+          </div>
+        </div>
+
+        <button class="next-button" disabled>다음</button>
+      </div>
+    </div>
+  </body>
+</html>

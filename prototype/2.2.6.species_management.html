@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 종족 관리</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+        --card-background: rgba(26, 58, 47, 0.3);
+
+        /* 종족별 색상 */
+        --red-eared-turtle: #e74c3c;
+        --desert-turtle: #f39c12;
+        --greek-turtle: #3498db;
+
+        /* 현재 종족 (그리스거북) */
+        --current-species: var(--greek-turtle);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        padding-bottom: 20px;
+      }
+
+      /* 상단 바 */
+      .top-bar {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: rgba(26, 58, 47, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 100;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+      }
+
+      .back-button {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        color: var(--text);
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .back-button:hover {
+        background: var(--accent-color);
+        transform: scale(1.05);
+      }
+
+      .page-title {
+        color: var(--text);
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .logo {
+        height: 30px;
+        width: 30px;
+        background: var(--accent-color);
+        border-radius: 8px;
+        position: relative;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 20px;
+        height: 20px;
+        background: var(--background);
+        border-radius: 5px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      /* 메인 컨테이너 */
+      .main-container {
+        padding: 80px 20px 20px;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      /* 현재 종족 카드 */
+      .current-species-card {
+        background: linear-gradient(
+          135deg,
+          rgba(52, 152, 219, 0.2),
+          rgba(41, 128, 185, 0.2)
+        );
+        border: 2px solid var(--current-species);
+        border-radius: 20px;
+        padding: 24px;
+        margin-bottom: 20px;
+        text-align: center;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 8px 24px rgba(52, 152, 219, 0.3);
+      }
+
+      .species-emblem {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--current-species), #2980b9);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        margin: 0 auto 16px;
+        box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+        position: relative;
+      }
+
+      .species-emblem::after {
+        content: "🔵";
+      }
+
+      .species-name {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--current-species);
+        margin-bottom: 8px;
+      }
+
+      .species-subtitle {
+        font-size: 14px;
+        color: var(--text-secondary);
+        margin-bottom: 16px;
+      }
+
+      .species-level {
+        display: inline-block;
+        background: var(--current-species);
+        color: white;
+        padding: 6px 12px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+
+      /* 버프 현황 */
+      .buff-stats-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .buff-stats-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .buff-stats-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(52, 152, 219, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--current-species);
+      }
+
+      .buff-stats-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .buff-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .buff-item {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        padding: 16px;
+        text-align: center;
+      }
+
+      .buff-value {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--current-species);
+        margin-bottom: 4px;
+      }
+
+      .buff-label {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.3;
+      }
+
+      .buff-description {
+        font-size: 11px;
+        color: var(--text-secondary);
+        opacity: 0.8;
+        margin-top: 4px;
+      }
+
+      /* 종족 비교표 */
+      .species-comparison {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .comparison-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .comparison-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(74, 157, 127, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: var(--accent-color);
+      }
+
+      .comparison-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .species-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px;
+        margin-bottom: 8px;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.05);
+        transition: all 0.3s ease;
+      }
+
+      .species-row.current {
+        background: rgba(52, 152, 219, 0.2);
+        border: 1px solid var(--current-species);
+      }
+
+      .species-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+
+      .species-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+      }
+
+      .red-eared {
+        background: var(--red-eared-turtle);
+      }
+      .desert {
+        background: var(--desert-turtle);
+      }
+      .greek {
+        background: var(--greek-turtle);
+      }
+
+      .species-details h4 {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+
+      .species-details p {
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      .species-total {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--accent-color);
+      }
+
+      /* 종족 변경 */
+      .change-species-card {
+        background: var(--card-background);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .change-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .change-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(243, 156, 18, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #f39c12;
+      }
+
+      .change-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .change-info {
+        background: rgba(243, 156, 18, 0.1);
+        border: 1px solid rgba(243, 156, 18, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 16px;
+      }
+
+      .cooldown-status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .cooldown-icon {
+        font-size: 16px;
+      }
+
+      .cooldown-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #f39c12;
+      }
+
+      .cooldown-description {
+        font-size: 12px;
+        color: var(--text-secondary);
+        line-height: 1.4;
+      }
+
+      .change-button {
+        width: 100%;
+        padding: 16px;
+        background: rgba(243, 156, 18, 0.2);
+        border: 1px solid rgba(243, 156, 18, 0.4);
+        border-radius: 12px;
+        color: var(--text-secondary);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: not-allowed;
+        transition: all 0.3s ease;
+      }
+
+      .change-button:disabled {
+        opacity: 0.6;
+      }
+
+      /* 성과 요약 */
+      .achievement-summary {
+        background: linear-gradient(
+          135deg,
+          rgba(46, 204, 113, 0.1),
+          rgba(39, 174, 96, 0.1)
+        );
+        border: 1px solid rgba(46, 204, 113, 0.3);
+        border-radius: 16px;
+        padding: 20px;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      }
+
+      .achievement-header {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .achievement-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 12px;
+        background: rgba(46, 204, 113, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 20px;
+        color: #2ecc71;
+      }
+
+      .achievement-title {
+        font-size: 16px;
+        font-weight: 600;
+      }
+
+      .achievement-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 12px;
+      }
+
+      .achievement-stat {
+        text-align: center;
+        padding: 12px;
+        background: rgba(46, 204, 113, 0.1);
+        border-radius: 12px;
+      }
+
+      .achievement-value {
+        font-size: 18px;
+        font-weight: 700;
+        color: #2ecc71;
+        margin-bottom: 4px;
+      }
+
+      .achievement-label {
+        font-size: 11px;
+        color: var(--text-secondary);
+      }
+
+      /* 애니메이션 */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .fade-in {
+        animation: fadeInUp 0.6s ease-out forwards;
+      }
+
+      @keyframes glow {
+        0%,
+        100% {
+          box-shadow: 0 6px 18px rgba(52, 152, 219, 0.4);
+        }
+        50% {
+          box-shadow: 0 8px 24px rgba(52, 152, 219, 0.6);
+        }
+      }
+
+      .species-emblem {
+        animation: glow 3s ease-in-out infinite;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- 상단 바 -->
+    <div class="top-bar">
+      <div class="back-button">←</div>
+      <div class="page-title">종족 관리</div>
+      <div class="logo"></div>
+    </div>
+
+    <!-- 메인 컨테이너 -->
+    <div class="main-container">
+      <!-- 현재 종족 -->
+      <div class="current-species-card fade-in">
+        <div class="species-emblem"></div>
+        <div class="species-name">그리스거북</div>
+        <div class="species-subtitle">다양한 경로 탐색 특화</div>
+        <div class="species-level">Lv.12 · 활동 32일</div>
+      </div>
+
+      <!-- 버프 현황 -->
+      <div class="buff-stats-card fade-in">
+        <div class="buff-stats-header">
+          <div class="buff-stats-icon">⚡</div>
+          <div class="buff-stats-title">그리스거북 버프 현황</div>
+        </div>
+
+        <div class="buff-grid">
+          <div class="buff-item">
+            <div class="buff-value">50%</div>
+            <div class="buff-label">기본 버프</div>
+            <div class="buff-description">3km 이상 달릴 시</div>
+          </div>
+
+          <div class="buff-item">
+            <div class="buff-value">25%</div>
+            <div class="buff-label">페이스 버프</div>
+            <div class="buff-description">6'30"/km 이하 시</div>
+          </div>
+
+          <div class="buff-item">
+            <div class="buff-value">15%</div>
+            <div class="buff-label">거리 버프</div>
+            <div class="buff-description">5km 이상 달릴 시</div>
+          </div>
+
+          <div class="buff-item">
+            <div class="buff-value">10%</div>
+            <div class="buff-label">탐사 버프</div>
+            <div class="buff-description">새로운 경로 30% 이상</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 종족 비교표 -->
+      <div class="species-comparison fade-in">
+        <div class="comparison-header">
+          <div class="comparison-icon">🏆</div>
+          <div class="comparison-title">종족별 최대 버프 비교</div>
+        </div>
+
+        <div class="species-row">
+          <div class="species-info">
+            <div class="species-icon red-eared">🔴</div>
+            <div class="species-details">
+              <h4>붉은귀거북</h4>
+              <p>빠른 속도와 민첩성</p>
+            </div>
+          </div>
+          <div class="species-total">100%</div>
+        </div>
+
+        <div class="species-row">
+          <div class="species-info">
+            <div class="species-icon desert">🟡</div>
+            <div class="species-details">
+              <h4>사막거북</h4>
+              <p>장거리와 지구력</p>
+            </div>
+          </div>
+          <div class="species-total">100%</div>
+        </div>
+
+        <div class="species-row current">
+          <div class="species-info">
+            <div class="species-icon greek">🔵</div>
+            <div class="species-details">
+              <h4>그리스거북</h4>
+              <p>다양한 경로 탐색</p>
+            </div>
+          </div>
+          <div class="species-total">100%</div>
+        </div>
+      </div>
+
+      <!-- 종족 변경 -->
+      <div class="change-species-card fade-in">
+        <div class="change-header">
+          <div class="change-icon">🔄</div>
+          <div class="change-title">종족 변경</div>
+        </div>
+
+        <div class="change-info">
+          <div class="cooldown-status">
+            <span class="cooldown-icon">⏰</span>
+            <span class="cooldown-text">변경 가능까지 18일 남음</span>
+          </div>
+          <div class="cooldown-description">
+            종족 변경은 30일마다 1회 가능합니다. 마지막 변경일: 2024.12.11
+          </div>
+        </div>
+
+        <button class="change-button" disabled>
+          종족 변경하기 (18일 후 가능)
+        </button>
+      </div>
+
+      <!-- 그리스거북 성과 요약 -->
+      <div class="achievement-summary fade-in">
+        <div class="achievement-header">
+          <div class="achievement-icon">📊</div>
+          <div class="achievement-title">그리스거북 성과</div>
+        </div>
+
+        <div class="achievement-stats">
+          <div class="achievement-stat">
+            <div class="achievement-value">89</div>
+            <div class="achievement-label">기본 버프<br />획득 횟수</div>
+          </div>
+
+          <div class="achievement-stat">
+            <div class="achievement-value">34</div>
+            <div class="achievement-label">페이스 버프<br />획득 횟수</div>
+          </div>
+
+          <div class="achievement-stat">
+            <div class="achievement-value">12</div>
+            <div class="achievement-label">탐사 버프<br />획득 횟수</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // 뒤로가기 버튼
+      document.querySelector(".back-button").addEventListener("click", () => {
+        console.log("Navigate back to profile menu");
+        window.location.href = "2.2.1.profile_menu.html";
+      });
+
+      // 페이드인 애니메이션 순차 적용
+      document.addEventListener("DOMContentLoaded", () => {
+        const cards = document.querySelectorAll(".fade-in");
+        cards.forEach((card, index) => {
+          card.style.animationDelay = `${index * 0.2}s`;
+        });
+
+        // 버프 수치 애니메이션
+        const buffValues = document.querySelectorAll(".buff-value");
+        const targetValues = [50, 25, 15, 10];
+
+        buffValues.forEach((element, index) => {
+          animateValue(element, 0, targetValues[index], 1500, "%");
+        });
+
+        // 성과 수치 애니메이션
+        const achievementValues =
+          document.querySelectorAll(".achievement-value");
+        const achievementTargets = [89, 34, 12];
+
+        setTimeout(() => {
+          achievementValues.forEach((element, index) => {
+            animateValue(element, 0, achievementTargets[index], 1200);
+          });
+        }, 800);
+      });
+
+      function animateValue(element, start, end, duration, suffix = "") {
+        let startTime = null;
+
+        function step(currentTime) {
+          if (!startTime) startTime = currentTime;
+          const progress = Math.min((currentTime - startTime) / duration, 1);
+          const current = start + (end - start) * progress;
+
+          element.textContent = Math.floor(current) + suffix;
+
+          if (progress < 1) {
+            requestAnimationFrame(step);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+    </script>
+  </body>
+</html>

@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 종족 선택</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+        --red-turtle: #e74c3c;
+        --yellow-turtle: #f1c40f;
+        --blue-turtle: #3498db;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      .selection-header {
+        padding: 40px 20px 30px 20px;
+        text-align: center;
+        position: relative;
+        z-index: 5;
+      }
+
+      .selection-header h1 {
+        color: var(--text);
+        margin-bottom: 15px;
+        font-size: 24px;
+      }
+
+      .selection-header p {
+        color: var(--text-secondary);
+        font-size: 16px;
+        margin-bottom: 10px;
+      }
+
+      .recommendation-badge {
+        background: none;
+        padding: 0;
+        border-radius: 0;
+        font-size: 14px;
+        font-weight: 400;
+        color: var(--accent-color);
+        display: inline-block;
+        margin-top: 10px;
+      }
+
+      .tribes-container {
+        padding: 40px 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 60vh;
+        position: relative;
+      }
+
+      .triangle-layout {
+        position: relative;
+        width: 280px;
+        height: 250px;
+      }
+
+      .tribe-symbol {
+        position: absolute;
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+      }
+
+      .tribe-symbol:hover {
+        transform: scale(1.1);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.4);
+      }
+
+      .tribe-symbol.recommended {
+        animation: pulse-recommend 2s infinite;
+        box-shadow: 0 0 0 4px rgba(116, 196, 147, 0.6);
+      }
+
+      .tribe-symbol.selected {
+        transform: scale(1.2);
+        z-index: 3;
+      }
+
+      /* 정삼각형 배치 */
+      .red-turtle {
+        top: 0;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, var(--red-turtle), #c0392b);
+      }
+
+      .yellow-turtle {
+        bottom: 0;
+        left: 0;
+        background: linear-gradient(135deg, var(--yellow-turtle), #e67e22);
+      }
+
+      .blue-turtle {
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(135deg, var(--blue-turtle), #2980b9);
+      }
+
+      /* 종족 심볼 SVG */
+      .tribe-icon {
+        width: 80px;
+        height: 80px;
+        fill: white;
+      }
+
+      .tribe-label {
+        position: absolute;
+        bottom: -30px;
+        left: 50%;
+        transform: translateX(-50%);
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text);
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      /* 상세 정보 모달 */
+      .detail-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 100;
+        opacity: 0;
+        visibility: hidden;
+        transition: all 0.3s ease;
+      }
+
+      .detail-modal.active {
+        opacity: 1;
+        visibility: visible;
+      }
+
+      .detail-content {
+        background: var(--main-color);
+        border-radius: 20px;
+        padding: 30px;
+        max-width: 350px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        transform: translateY(50px);
+        transition: transform 0.3s ease;
+      }
+
+      .detail-modal.active .detail-content {
+        transform: translateY(0);
+      }
+
+      .detail-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+      }
+
+      .detail-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        margin-right: 15px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .detail-icon svg {
+        width: 35px;
+        height: 35px;
+        fill: white;
+      }
+
+      .detail-title {
+        font-size: 20px;
+        font-weight: 700;
+        margin-bottom: 5px;
+      }
+
+      .detail-subtitle {
+        color: var(--text-secondary);
+        font-size: 14px;
+      }
+
+      .buff-section {
+        margin: 20px 0;
+      }
+
+      .buff-section h3 {
+        color: var(--accent-color);
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .buff-item {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 12px;
+        border-radius: 8px;
+        margin-bottom: 8px;
+        border-left: 3px solid var(--accent-color);
+      }
+
+      .buff-name {
+        font-weight: 600;
+        margin-bottom: 4px;
+      }
+
+      .buff-desc {
+        color: var(--text-secondary);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .buff-value {
+        color: var(--accent-color);
+        font-weight: 600;
+        float: right;
+      }
+
+      .close-button {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: none;
+        border: none;
+        color: var(--text-secondary);
+        font-size: 24px;
+        cursor: pointer;
+        padding: 5px;
+      }
+
+      .close-button:hover {
+        color: var(--text);
+      }
+
+      .select-button {
+        width: 100%;
+        padding: 15px;
+        background: var(--accent-color);
+        color: var(--text);
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 20px;
+        transition: all 0.3s ease;
+      }
+
+      .select-button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .tribe-notice {
+        text-align: center;
+        margin-top: 12px;
+        color: var(--text-secondary);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
+      /* 애니메이션 */
+      @keyframes pulse-recommend {
+        0% {
+          box-shadow: 0 0 0 4px rgba(116, 196, 147, 0.6);
+        }
+        50% {
+          box-shadow: 0 0 0 8px rgba(116, 196, 147, 0.3);
+        }
+        100% {
+          box-shadow: 0 0 0 4px rgba(116, 196, 147, 0.6);
+        }
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px);
+        }
+        50% {
+          transform: translateY(-10px);
+        }
+      }
+
+      .tribe-symbol {
+        animation: float 3s ease-in-out infinite;
+      }
+
+      .red-turtle {
+        animation-delay: 0s;
+      }
+
+      .yellow-turtle {
+        animation-delay: 1s;
+      }
+
+      .blue-turtle {
+        animation-delay: 2s;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="selection-header">
+      <h1>종족을 선택하세요</h1>
+      <p>러닝 스타일에 맞는 종족을 선택하면 더 많은 버프를 받을 수 있어요</p>
+      <div class="recommendation-badge">붉은귀거북을 추천드려요!</div>
+    </div>
+
+    <div class="tribes-container">
+      <div class="triangle-layout">
+        <!-- 붉은귀거북 (빠른 속도) -->
+        <div class="tribe-symbol red-turtle recommended" data-tribe="red">
+          <svg class="tribe-icon" viewBox="0 0 100 100">
+            <!-- 붉은귀거북 문장: 방패 모양에 화살표와 거북이 -->
+            <path
+              d="M50,5 L85,25 L85,70 L50,95 L15,70 L15,25 Z"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+            />
+            <path
+              d="M30,35 L50,20 L70,35 L65,40 L50,30 L35,40 Z"
+              fill="white"
+            />
+            <circle
+              cx="50"
+              cy="55"
+              r="12"
+              fill="none"
+              stroke="white"
+              stroke-width="1.5"
+            />
+            <circle cx="47" cy="52" r="1.5" fill="white" />
+            <circle cx="53" cy="52" r="1.5" fill="white" />
+            <path
+              d="M47,60 Q50,62 53,60"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+            <path
+              d="M38,65 L42,63 L46,65 L50,63 L54,65 L58,63 L62,65"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+            <path
+              d="M35,75 L50,85 L65,75"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+          </svg>
+          <div class="tribe-label">붉은귀거북</div>
+        </div>
+
+        <!-- 사막거북 (지구력) -->
+        <div class="tribe-symbol yellow-turtle" data-tribe="yellow">
+          <svg class="tribe-icon" viewBox="0 0 100 100">
+            <!-- 사막거북 문장: 방패 모양에 산과 태양 -->
+            <path
+              d="M50,5 L85,25 L85,70 L50,95 L15,70 L15,25 Z"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+            />
+            <circle cx="50" cy="25" r="8" fill="white" />
+            <path
+              d="M20,45 L30,38 L40,42 L50,35 L60,42 L70,38 L80,45"
+              stroke="white"
+              stroke-width="1.5"
+              fill="none"
+            />
+            <circle
+              cx="50"
+              cy="60"
+              r="10"
+              fill="none"
+              stroke="white"
+              stroke-width="1.5"
+            />
+            <circle cx="47" cy="58" r="1" fill="white" />
+            <circle cx="53" cy="58" r="1" fill="white" />
+            <path
+              d="M47,64 Q50,66 53,64"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+            <path
+              d="M42,70 L44,68 L46,70 L48,68 L52,70 L54,68 L56,70 L58,68"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+            <path
+              d="M35,80 L50,88 L65,80"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+          </svg>
+          <div class="tribe-label">사막거북</div>
+        </div>
+
+        <!-- 그리스거북 (탐험) -->
+        <div class="tribe-symbol blue-turtle" data-tribe="blue">
+          <svg class="tribe-icon" viewBox="0 0 100 100">
+            <!-- 그리스거북 문장: 방패 모양에 나침반과 경로 -->
+            <path
+              d="M50,5 L85,25 L85,70 L50,95 L15,70 L15,25 Z"
+              fill="none"
+              stroke="white"
+              stroke-width="2"
+            />
+            <circle
+              cx="50"
+              cy="40"
+              r="15"
+              fill="none"
+              stroke="white"
+              stroke-width="1.5"
+            />
+            <path d="M50,28 L53,38 L50,40 L47,38 Z" fill="white" />
+            <text x="50" y="25" font-size="6" text-anchor="middle" fill="white">
+              N
+            </text>
+            <path
+              d="M25,25 Q35,30 30,35 Q40,32 50,40 Q60,30 70,35 Q65,40 75,45"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+              stroke-dasharray="1,1"
+            />
+            <circle
+              cx="50"
+              cy="65"
+              r="8"
+              fill="none"
+              stroke="white"
+              stroke-width="1"
+            />
+            <circle cx="48" cy="63" r="1" fill="white" />
+            <circle cx="52" cy="63" r="1" fill="white" />
+            <path
+              d="M48,68 Q50,70 52,68"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+            <path
+              d="M35,80 L50,88 L65,80"
+              stroke="white"
+              stroke-width="1"
+              fill="none"
+            />
+          </svg>
+          <div class="tribe-label">그리스거북</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 상세 정보 모달 -->
+    <div class="detail-modal" id="detailModal">
+      <div class="detail-content">
+        <button class="close-button" onclick="closeModal()">&times;</button>
+        <div class="detail-header">
+          <div class="detail-icon" id="modalIcon"></div>
+          <div>
+            <div class="detail-title" id="modalTitle"></div>
+            <div class="detail-subtitle" id="modalSubtitle"></div>
+          </div>
+        </div>
+
+        <div class="buff-section">
+          <h3>🎯 종족 버프</h3>
+          <div id="buffList"></div>
+        </div>
+
+        <button class="select-button" onclick="selectTribe()">
+          이 종족 선택하기
+        </button>
+
+        <div class="tribe-notice">⚠️ 종족 변경은 30일마다 1회만 가능해요</div>
+      </div>
+    </div>
+
+    <script>
+      const tribeData = {
+        red: {
+          name: "붉은귀거북",
+          subtitle: "빠른 속도와 민첩성 특화",
+          color: "var(--red-turtle)",
+          buffs: [
+            {
+              name: "기본 버프",
+              desc: "3Km 이상 달릴 시 Shell layer 획득",
+              value: "50%",
+            },
+            {
+              name: "페이스 버프",
+              desc: "평균 페이스 6'30\"/km 이하 달성 시",
+              value: "35%",
+            },
+            {
+              name: "거리 버프",
+              desc: "5km 이상 달릴 시 Shell layer 획득",
+              value: "15%",
+            },
+          ],
+        },
+        yellow: {
+          name: "사막거북",
+          subtitle: "장거리와 지구력 특화",
+          color: "var(--yellow-turtle)",
+          buffs: [
+            {
+              name: "기본 버프",
+              desc: "3Km 이상 달릴 시 Shell layer 획득",
+              value: "50%",
+            },
+            {
+              name: "페이스 버프",
+              desc: "평균 페이스 6'30\"/km 이하 달성 시",
+              value: "20%",
+            },
+            {
+              name: "거리 버프",
+              desc: "5km 이상 달릴 시 Shell layer 획득",
+              value: "30%",
+            },
+          ],
+        },
+        blue: {
+          name: "그리스거북",
+          subtitle: "다양한 경로 탐색 특화",
+          color: "var(--blue-turtle)",
+          buffs: [
+            {
+              name: "기본 버프",
+              desc: "3Km 이상 달릴 시 Shell layer 획득",
+              value: "50%",
+            },
+            {
+              name: "페이스 버프",
+              desc: "평균 페이스 6'30\"/km 이하 달성 시",
+              value: "25%",
+            },
+            {
+              name: "거리 버프",
+              desc: "5km 이상 달릴 시 Shell layer 획득",
+              value: "15%",
+            },
+            {
+              name: "탐사 버프",
+              desc: "새로운 경로 30% 이상 포함 시",
+              value: "10%",
+            },
+          ],
+        },
+      };
+
+      let selectedTribe = null;
+
+      // 종족 심볼 클릭 이벤트
+      document.querySelectorAll(".tribe-symbol").forEach((symbol) => {
+        symbol.addEventListener("click", function () {
+          const tribe = this.dataset.tribe;
+          showDetail(tribe);
+        });
+      });
+
+      function showDetail(tribe) {
+        const data = tribeData[tribe];
+        const modal = document.getElementById("detailModal");
+
+        // 모달 내용 업데이트
+        document.getElementById("modalTitle").textContent = data.name;
+        document.getElementById("modalSubtitle").textContent = data.subtitle;
+
+        // 아이콘 색상 설정
+        const iconElement = document.getElementById("modalIcon");
+        iconElement.style.background = `linear-gradient(135deg, ${data.color}, ${data.color}dd)`;
+
+        // 아이콘 복사
+        const originalIcon = document.querySelector(
+          `[data-tribe="${tribe}"] .tribe-icon`
+        );
+        iconElement.innerHTML = originalIcon.outerHTML;
+
+        // 버프 리스트 생성
+        const buffList = document.getElementById("buffList");
+        buffList.innerHTML = data.buffs
+          .map(
+            (buff) => `
+          <div class="buff-item">
+            <div class="buff-name">
+              ${buff.name}
+              <span class="buff-value">${buff.value}</span>
+            </div>
+            <div class="buff-desc">${buff.desc}</div>
+          </div>
+        `
+          )
+          .join("");
+
+        selectedTribe = tribe;
+        modal.classList.add("active");
+      }
+
+      function closeModal() {
+        document.getElementById("detailModal").classList.remove("active");
+      }
+
+      function selectTribe() {
+        if (selectedTribe) {
+          // const tribeName = tribeData[selectedTribe].name;
+          // alert(`${tribeName}을(를) 선택했습니다! 게임을 시작합니다.`);
+          // // 여기서 다음 단계로 이동
+          // closeModal();
+          window.location.href = "1.3.3.calculate_sp.html";
+        }
+      }
+
+      // 모달 외부 클릭시 닫기
+      document
+        .getElementById("detailModal")
+        .addEventListener("click", function (e) {
+          if (e.target === this) {
+            closeModal();
+          }
+        });
+
+      // ESC 키로 모달 닫기
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") {
+          closeModal();
+        }
+      });
+    </script>
+  </body>
+</html>

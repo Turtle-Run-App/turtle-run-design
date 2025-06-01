@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 프로필 설정</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 600px;
+      }
+
+      .profile-setup {
+        background: linear-gradient(
+          135deg,
+          var(--background),
+          var(--main-color)
+        );
+        border-radius: 12px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: var(--text);
+      }
+
+      .subtitle {
+        text-align: center;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+      }
+
+      .profile-image-section {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 30px;
+      }
+
+      .profile-image {
+        position: relative;
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        overflow: hidden;
+        border: 2px solid var(--accent-color);
+      }
+
+      .profile-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .image-upload {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: var(--accent-color);
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+      }
+
+      .upload-icon {
+        color: var(--text);
+        font-size: 20px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: var(--text);
+      }
+
+      .form-group input[type="text"],
+      .form-group input[type="date"],
+      .form-group input[type="number"] {
+        width: 100%;
+        padding: 12px;
+        background: rgba(26, 58, 47, 0.2);
+        border: 1px solid var(--accent-color);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 16px;
+        transition: all 0.3s ease;
+      }
+
+      .form-group input:focus {
+        outline: none;
+        border-color: var(--text);
+        background: rgba(26, 58, 47, 0.3);
+      }
+
+      .form-group input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      .gender-options {
+        display: flex;
+        gap: 20px;
+      }
+
+      .gender-option {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+        color: var(--text);
+      }
+
+      .gender-option input[type="radio"] {
+        margin-right: 8px;
+        accent-color: var(--accent-color);
+      }
+
+      .optional {
+        color: var(--text-secondary);
+      }
+
+      .optional label::after {
+        content: " (선택사항)";
+        font-size: 0.9em;
+        color: var(--text-secondary);
+      }
+
+      .submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: var(--accent-color);
+        color: var(--text);
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .submit-btn:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      @media (max-width: 480px) {
+        .container {
+          padding: 10px;
+        }
+
+        .profile-setup {
+          padding: 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="profile-setup">
+        <h1>프로필 설정</h1>
+        <p class="subtitle">러닝을 시작하기 전, 프로필을 설정해주세요</p>
+
+        <div class="profile-image-section">
+          <div class="profile-image">
+            <img
+              src="default-profile.png"
+              alt="프로필 이미지"
+              id="profile-preview"
+            />
+            <div class="image-upload">
+              <label for="image-upload">
+                <span class="upload-icon">+</span>
+              </label>
+              <input type="file" id="image-upload" accept="image/*" hidden />
+            </div>
+          </div>
+        </div>
+
+        <form class="profile-form">
+          <div class="form-group">
+            <label for="nickname">닉네임</label>
+            <input
+              type="text"
+              id="nickname"
+              placeholder="닉네임을 입력해주세요"
+              required
+            />
+          </div>
+
+          <div class="form-group">
+            <label>성별</label>
+            <div class="gender-options">
+              <label class="gender-option">
+                <input type="radio" name="gender" value="male" />
+                <span>남성</span>
+              </label>
+              <label class="gender-option">
+                <input type="radio" name="gender" value="female" />
+                <span>여성</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="birthdate">생년월일</label>
+            <input type="date" id="birthdate" required />
+          </div>
+
+          <div class="form-group optional">
+            <label for="height">키 (cm)</label>
+            <input type="number" id="height" placeholder="선택사항" />
+          </div>
+
+          <div class="form-group optional">
+            <label for="weight">몸무게 (kg)</label>
+            <input type="number" id="weight" placeholder="선택사항" />
+          </div>
+
+          <button
+            type="submit"
+            class="submit-btn"
+            onclick="window.location.href='1.2.1.data_sync.html'"
+          >
+            다음
+          </button>
+        </form>
+      </div>
+    </div>
+  </body>
+</html>

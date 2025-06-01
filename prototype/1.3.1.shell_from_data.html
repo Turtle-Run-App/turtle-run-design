@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - Shell Generation</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+        cursor: pointer;
+      }
+
+      /* Shell 시각화 섹션 */
+      .shell-section {
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .shell-header {
+        padding: 40px 20px 30px 20px;
+        text-align: center;
+        position: relative;
+        z-index: 5;
+      }
+
+      .shell-header h1 {
+        color: var(--text);
+        margin-bottom: 15px;
+        font-size: 24px;
+      }
+
+      .shell-header p {
+        color: var(--text-secondary);
+        margin-bottom: 20px;
+        font-size: 16px;
+      }
+
+      .sp-display {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--accent-color);
+        display: inline-block;
+        margin-top: 5px;
+      }
+
+      .map-container {
+        flex: 1;
+        position: relative;
+        background: linear-gradient(
+          135deg,
+          var(--background),
+          var(--main-color)
+        );
+      }
+
+      .main-shell-container {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 350px;
+        height: 350px;
+        transition: all 0.3s ease;
+      }
+
+      .shell-hex {
+        fill: rgba(74, 157, 127, 0.3);
+        stroke: rgba(74, 157, 127, 0.6);
+        stroke-width: 0.3;
+        animation: shellAppear 1s ease-out;
+      }
+
+      .shell-hex.core {
+        fill: rgba(74, 157, 127, 0.6);
+        animation: shellAppear 1.2s ease-out;
+      }
+
+      .shell-hex.frequent {
+        fill: rgba(74, 157, 127, 0.45);
+        animation: shellAppear 1.1s ease-out;
+      }
+
+      .continue-prompt {
+        position: absolute;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        text-align: center;
+        z-index: 5;
+        opacity: 0;
+        animation: fadeInPrompt 0.5s ease-out 3s forwards;
+      }
+
+      .continue-text {
+        color: var(--text-secondary);
+        font-size: 16px;
+        margin-bottom: 15px;
+        animation: pulse 1.5s infinite;
+      }
+
+      .tap-indicator {
+        width: 40px;
+        height: 40px;
+        background: rgba(74, 157, 127, 0.3);
+        border: 2px solid var(--accent-color);
+        border-radius: 50%;
+        margin: 0 auto;
+        animation: pulse 1.5s infinite;
+      }
+
+      /* 애니메이션 */
+      @keyframes shellAppear {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      @keyframes fadeInPrompt {
+        from {
+          opacity: 0;
+          transform: translateX(-50%) translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+        50% {
+          transform: scale(1.05);
+          opacity: 1;
+        }
+        100% {
+          transform: scale(1);
+          opacity: 0.7;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Shell 시각화 섹션 -->
+    <section class="shell-section" id="shell">
+      <div class="shell-header">
+        <h1>Shell이 생성되었어요!</h1>
+        <p>당신이 뛰어온 길이 지도 위에 Shell로 변했어요</p>
+        <div class="sp-display">SP: 847</div>
+      </div>
+
+      <div class="map-container">
+        <div class="main-shell-container">
+          <svg viewBox="0 0 100 100" preserveAspectRatio="xMidYMid meet">
+            <!-- 러닝 경로를 따라 형성된 정육각형 타일들 -->
+
+            <!-- 메인 러닝 경로 주변 타일들 (자주 뛰는 구간) -->
+            <polygon
+              class="shell-hex core"
+              points="35,15 40,12 45,15 45,21 40,24 35,21"
+            />
+            <polygon
+              class="shell-hex core"
+              points="40,21 45,18 50,21 50,27 45,30 40,27"
+            />
+            <polygon
+              class="shell-hex core"
+              points="45,27 50,24 55,27 55,33 50,36 45,33"
+            />
+            <polygon
+              class="shell-hex core"
+              points="50,33 55,30 60,33 60,39 55,42 50,39"
+            />
+            <polygon
+              class="shell-hex core"
+              points="55,39 60,36 65,39 65,45 60,48 55,45"
+            />
+            <polygon
+              class="shell-hex core"
+              points="60,45 65,42 70,45 70,51 65,54 60,51"
+            />
+            <polygon
+              class="shell-hex core"
+              points="65,51 70,48 75,51 75,57 70,60 65,57"
+            />
+            <polygon
+              class="shell-hex core"
+              points="55,57 60,54 65,57 65,63 60,66 55,63"
+            />
+            <polygon
+              class="shell-hex core"
+              points="45,63 50,60 55,63 55,69 50,72 45,69"
+            />
+            <polygon
+              class="shell-hex core"
+              points="35,69 40,66 45,69 45,75 40,78 35,75"
+            />
+            <polygon
+              class="shell-hex core"
+              points="25,75 30,72 35,75 35,81 30,84 25,81"
+            />
+            <polygon
+              class="shell-hex core"
+              points="20,69 25,66 30,69 30,75 25,78 20,75"
+            />
+            <polygon
+              class="shell-hex core"
+              points="20,57 25,54 30,57 30,63 25,66 20,63"
+            />
+            <polygon
+              class="shell-hex core"
+              points="25,45 30,42 35,45 35,51 30,54 25,51"
+            />
+            <polygon
+              class="shell-hex core"
+              points="30,33 35,30 40,33 40,39 35,42 30,39"
+            />
+            <polygon
+              class="shell-hex core"
+              points="30,21 35,18 40,21 40,27 35,30 30,27"
+            />
+
+            <!-- 가끔 뛰는 구간 타일들 -->
+            <polygon
+              class="shell-hex frequent"
+              points="50,15 55,12 60,15 60,21 55,24 50,21"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="55,21 60,18 65,21 65,27 60,30 55,27"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="60,27 65,24 70,27 70,33 65,36 60,33"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="65,33 70,30 75,33 75,39 70,42 65,39"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="70,39 75,36 80,39 80,45 75,48 70,45"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="70,57 75,54 80,57 80,63 75,66 70,63"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="60,63 65,60 70,63 70,69 65,72 60,69"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="50,69 55,66 60,69 60,75 55,78 50,75"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="40,75 45,72 50,75 50,81 45,84 40,81"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="30,81 35,78 40,81 40,87 35,90 30,87"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="15,75 20,72 25,75 25,81 20,84 15,81"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="15,63 20,60 25,63 25,69 20,72 15,69"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="15,51 20,48 25,51 25,57 20,60 15,57"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="20,39 25,36 30,39 30,45 25,48 20,45"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="25,27 30,24 35,27 35,33 30,36 25,33"
+            />
+            <polygon
+              class="shell-hex frequent"
+              points="25,15 30,12 35,15 35,21 30,24 25,21"
+            />
+
+            <!-- 내부 채움 타일들 (한 번만 뛴 구간) -->
+            <polygon
+              class="shell-hex"
+              points="40,39 45,36 50,39 50,45 45,48 40,45"
+            />
+            <polygon
+              class="shell-hex"
+              points="45,45 50,42 55,45 55,51 50,54 45,51"
+            />
+            <polygon
+              class="shell-hex"
+              points="50,51 55,48 60,51 60,57 55,60 50,57"
+            />
+            <polygon
+              class="shell-hex"
+              points="40,51 45,48 50,51 50,57 45,60 40,57"
+            />
+            <polygon
+              class="shell-hex"
+              points="35,57 40,54 45,57 45,63 40,66 35,63"
+            />
+            <polygon
+              class="shell-hex"
+              points="30,63 35,60 40,63 40,69 35,72 30,69"
+            />
+            <polygon
+              class="shell-hex"
+              points="25,57 30,54 35,57 35,63 30,66 25,63"
+            />
+            <polygon
+              class="shell-hex"
+              points="30,45 35,42 40,45 40,51 35,54 30,51"
+            />
+            <polygon
+              class="shell-hex"
+              points="35,33 40,30 45,33 45,39 40,42 35,39"
+            />
+            <polygon
+              class="shell-hex"
+              points="40,27 45,24 50,27 50,33 45,36 40,33"
+            />
+            <polygon
+              class="shell-hex"
+              points="45,21 50,18 55,21 55,27 50,30 45,27"
+            />
+
+            <!-- 외곽 보조 타일들 -->
+            <polygon
+              class="shell-hex"
+              points="60,15 65,12 70,15 70,21 65,24 60,21"
+            />
+            <polygon
+              class="shell-hex"
+              points="75,45 80,42 85,45 85,51 80,54 75,51"
+            />
+            <polygon
+              class="shell-hex"
+              points="55,75 60,72 65,75 65,81 60,84 55,81"
+            />
+            <polygon
+              class="shell-hex"
+              points="20,27 25,24 30,27 30,33 25,36 20,33"
+            />
+            <polygon
+              class="shell-hex"
+              points="10,57 15,54 20,57 20,63 15,66 10,63"
+            />
+          </svg>
+        </div>
+
+        <div class="continue-prompt">
+          <div class="continue-text">터치하여 계속</div>
+        </div>
+      </div>
+    </section>
+
+    <script>
+      // 화면 터치/클릭 시 다음 단계로 이동
+      let canClick = false;
+
+      document.body.addEventListener("click", function () {
+        if (canClick) {
+          window.location.href = "1.3.2.tribe_selection.html";
+        }
+      });
+
+      // 초기화 시 3초 후 터치 프롬프트 표시 및 클릭 활성화
+      window.addEventListener("load", function () {
+        setTimeout(() => {
+          document.querySelector(".continue-prompt").style.opacity = "1";
+          canClick = true;
+        }, 3000);
+      });
+    </script>
+  </body>
+</html>

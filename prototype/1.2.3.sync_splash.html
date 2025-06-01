@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - 데이터 동기화</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: linear-gradient(
+          135deg,
+          var(--background),
+          var(--main-color)
+        );
+        color: var(--text);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        overflow: hidden;
+      }
+
+      .sync-container {
+        text-align: center;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+      }
+
+      .logo {
+        width: 120px;
+        height: 120px;
+        background: var(--accent-color);
+        border-radius: 30px;
+        position: relative;
+        margin: 0 auto 30px;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: var(--background);
+        border-radius: 20px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      .loading-indicator {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--accent-color);
+        border-top-color: transparent;
+        border-radius: 50%;
+        margin: 20px auto;
+        animation: spin 1s linear infinite;
+      }
+
+      .message-container {
+        height: 80px;
+        margin: 0;
+        position: relative;
+        perspective: 1000px;
+        width: 300px;
+      }
+
+      .message {
+        position: absolute;
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(20px) rotateX(-10deg);
+        transition: all 0.5s ease;
+      }
+
+      .message.active {
+        opacity: 1;
+        transform: translateY(0) rotateX(0);
+      }
+
+      .message h2 {
+        font-size: 20px;
+        margin-bottom: 8px;
+        color: var(--accent-color);
+      }
+
+      .message p {
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      .progress-container {
+        width: 200px;
+        margin: 0;
+      }
+
+      .progress-bar {
+        width: 100%;
+        height: 4px;
+        background: rgba(74, 157, 127, 0.2);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+
+      .progress {
+        height: 100%;
+        background: var(--accent-color);
+        width: 0%;
+        transition: width 0.3s ease;
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="sync-container">
+      <div class="logo"></div>
+      <div class="loading-indicator"></div>
+
+      <div class="message-container">
+        <div class="message active">
+          <h2>러닝 데이터 분석 중...</h2>
+          <p>당신의 러닝 기록을 분석하고 있어요</p>
+        </div>
+      </div>
+
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress" style="width: 45%"></div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const messages = [
+        {
+          title: "러닝 기록 살펴보는 중...",
+          text: "당신이 뛰어온 길을 하나씩 살펴보고 있어요",
+        },
+        {
+          title: "Shell 만들기 시작!",
+          text: "당신이 뛰어온 길이 Shell로 변해가요",
+        },
+        {
+          title: "당신에게 맞는 종족을 찾는 중...",
+          text: "Shell 특성에 맞는 최적의 종족을 찾고 있어요",
+        },
+        {
+          title: "Shell 키우기 준비 중...",
+          text: "앞으로 뛸 때마다 Shell이 조금씩 커질 거예요",
+        },
+        {
+          title: "거의 다 왔어요!",
+          text: "곧 TurtleRun의 재미있는 세계로 들어갈 수 있어요",
+        },
+      ];
+
+      let currentMessageIndex = 0;
+      const messageContainer = document.querySelector(".message-container");
+      const progressBar = document.querySelector(".progress");
+
+      function updateMessage() {
+        const message = document.querySelector(".message");
+        message.classList.remove("active");
+
+        setTimeout(() => {
+          message.innerHTML = `
+            <h2>${messages[currentMessageIndex].title}</h2>
+            <p>${messages[currentMessageIndex].text}</p>
+          `;
+          message.classList.add("active");
+
+          currentMessageIndex++;
+
+          // 모든 메시지를 표시했으면 페이지 이동
+          if (currentMessageIndex >= messages.length) {
+            setTimeout(() => {
+              window.location.href = "1.3.1.shell_from_data.html";
+            }, 3000); // 마지막 메시지를 3초 더 표시 후 이동
+          } else {
+            // 다음 메시지로 계속 진행
+            setTimeout(updateMessage, 3000);
+          }
+        }, 500);
+      }
+
+      // 첫 번째 메시지 업데이트 시작
+      setTimeout(updateMessage, 3000);
+
+      // 프로그레스 바 애니메이션 (총 18초에 맞춰 조정)
+      // 5개 메시지 × 3초 + 마지막 대기 3초 = 18초
+      let progress = 0;
+      const totalTime = 18000; // 18초
+      const updateInterval = 100; // 100ms마다 업데이트
+      const progressStep = (100 / totalTime) * updateInterval;
+
+      const progressInterval = setInterval(() => {
+        progress += progressStep;
+        progressBar.style.width = `${Math.min(progress, 100)}%`;
+
+        if (progress >= 100) {
+          clearInterval(progressInterval);
+        }
+      }, updateInterval);
+    </script>
+  </body>
+</html>

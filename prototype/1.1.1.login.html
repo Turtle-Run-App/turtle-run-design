@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TurtleRun - Login</title>
+    <style>
+      :root {
+        --main-color: #1a3a2f;
+        --secondary-color: #2c4f43;
+        --accent-color: #4a9d7f;
+        --background: #121212;
+        --text: #ffffff;
+        --text-secondary: #b3b3b3;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      }
+
+      body {
+        background: var(--background);
+        color: var(--text);
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* 로고 스타일 */
+      .logo {
+        width: 120px;
+        height: 120px;
+        background: var(--accent-color);
+        border-radius: 30px;
+        position: relative;
+        animation: logoAppear 0.8s ease-out;
+      }
+
+      .logo::before {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 80px;
+        height: 80px;
+        background: var(--background);
+        border-radius: 20px;
+        clip-path: polygon(
+          50% 0%,
+          100% 25%,
+          100% 75%,
+          50% 100%,
+          0% 75%,
+          0% 25%
+        );
+      }
+
+      /* 스플래시 화면 */
+      .splash-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          135deg,
+          var(--background),
+          var(--main-color)
+        );
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+        animation: fadeOut 0.5s ease-in-out 2s forwards;
+      }
+
+      .loading-indicator {
+        width: 40px;
+        height: 40px;
+        border: 3px solid var(--accent-color);
+        border-top-color: transparent;
+        border-radius: 50%;
+        margin-top: 20px;
+        animation: spin 1s linear infinite;
+      }
+
+      /* 로그인 화면 */
+      .login-screen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        padding: 2rem;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        opacity: 0;
+        animation: fadeIn 0.5s ease-in-out 2s forwards;
+      }
+
+      .login-form {
+        width: 100%;
+        max-width: 320px;
+        margin-top: 2rem;
+      }
+
+      .login-form input {
+        width: 100%;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: rgba(26, 58, 47, 0.2);
+        border: 1px solid var(--accent-color);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+      }
+
+      .login-form input:focus {
+        outline: none;
+        border-color: var(--text);
+        background: rgba(26, 58, 47, 0.3);
+      }
+
+      .login-form input::placeholder {
+        color: var(--text-secondary);
+      }
+
+      .login-button {
+        width: 100%;
+        padding: 1rem;
+        margin-top: 1rem;
+        background: var(--accent-color);
+        border: none;
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .login-button:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+      }
+
+      .social-login {
+        width: 100%;
+        max-width: 320px;
+        margin-top: 2rem;
+      }
+
+      .social-button {
+        width: 100%;
+        padding: 1rem;
+        margin: 0.5rem 0;
+        background: transparent;
+        border: 1px solid var(--accent-color);
+        border-radius: 8px;
+        color: var(--text);
+        font-size: 1rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .social-button:hover {
+        background: rgba(74, 157, 127, 0.1);
+      }
+
+      .additional-options {
+        margin-top: 1rem;
+        display: flex;
+        gap: 1rem;
+      }
+
+      .additional-options a {
+        color: var(--accent-color);
+        text-decoration: none;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+      }
+
+      .additional-options a:hover {
+        color: var(--text);
+      }
+
+      /* 애니메이션 */
+      @keyframes fadeOut {
+        from {
+          opacity: 1;
+        }
+        to {
+          opacity: 0;
+          visibility: hidden;
+        }
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+
+      @keyframes logoAppear {
+        from {
+          transform: scale(0);
+          opacity: 0;
+        }
+        to {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+    >
+  </head>
+  <body>
+    <div class="login-screen">
+      <div class="logo"></div>
+      <form class="login-form">
+        <input type="email" placeholder="이메일" />
+        <input type="password" placeholder="비밀번호" />
+        <button type="submit" class="login-button">로그인</button>
+      </form>
+      <div class="social-login">
+        <button class="social-button">Apple로 로그인</button>
+        <button class="social-button">Google로 로그인</button>
+      </div>
+      <div class="additional-options">
+        <a href="#">비밀번호 찾기</a>
+        <a href="1.1.2.profile_setup.html">회원가입</a>
+      </div>
+    </div>
+  </body>
+</html>
